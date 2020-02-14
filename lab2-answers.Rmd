@@ -1,0 +1,139 @@
+---
+title: "Lab 2"
+output: html_notebook
+---
+
+
+1. Load the included `spotify.csv` file as a dataframe
+```{r}
+df = read.csv(file="spotify.csv", as.is=TRUE)
+```
+
+2. Print out the column names of your new dataframe.
+```{r}
+colnames(df)
+```
+
+3. Find all the songs (i.e. rows) by Shawn Mendes.
+```{r}
+df[df$artists == "Shawn Mendes",]
+```
+
+4. Find all the songs by Lizzo and/or Ariana Grande. Notice that there are some colaborations!
+```{r}
+df[grep("Lizzo|Ariana Grande", df$artists),]
+```
+
+5. Find all the songs which share the name of their album
+```{r}
+df[df$title == df$album, ]
+```
+
+6. Select the duration column.
+```{r}
+df$duration
+```
+
+7. Currently, the duration column is in milliseconds. This is great for computing, but not great for human readability. Make a new column called `durationFormatted`. The values of this column should be strings that look like "00:00" (minutes:seconds). We'll break this down into smaller steps...
+
+a. Get the durations in seconds instead of milliseconds. Note, there are 1000ms in a second.
+```{r}
+seconds <- df$duration/1000
+```
+
+b. We can figure out how many (whole) minutes are in some number of seconds like this:
+```{r}
+s <- 170.640
+minutes <-  floor(s/60)
+minutes
+```
+Since there are 60 seconds in a minute, we can get the number of minutes by dividing the number of milliseconds by 60. The function `floor` rounds down, so we're only getting the number of whole minutes.
+
+Re-write the above code to use the list of seconds from part (a) instead of a specific number of seconds.
+```{r}
+minutes <- floor(seconds/60)
+```
+
+c. Now to get the number of leftover seconds, subtract the number of minutes*60 from the number of seconds. Use `round()` to round to the closest number of seconds.
+```{r}
+seconds <- round(seconds - (minutes * 60))
+```
+
+d. Use `paste` to stick the minutes and seconds together with a ":", and assign those values to a new column called `durationFormatted`.
+```{r}
+df$durationFormatted <- paste(minutes, seconds, sep = ":")
+df
+```
+
+8. Let's play a game! In this game, the computer will randomly pick a song and give the user 3 chances to guess the song from a list of 10 options. We'll break this down into parts and put it all together at the end...
+
+a. Use the `sample` function (do `?sample` in the console to read the documentation) to randomly pick 10 songs from the list. 
+```{r}
+options <- sample(df$title, 10)
+options
+```
+
+b. Use `sample` again to randomly pick 1 song from the list of 10.
+```{r}
+winner <- sample(options, 1)
+winner
+```
+
+c. Print out "What song am I thinking of?" followed by each song title. It'll look best if you print all the song titles on a different line! 
+```{r}
+print("What song am I thining of?")
+print(options)
+```
+
+d. Write a for loop that prompts the user 3 times for a guess. You'll need the function `readline("message here")`.
+```{r}
+for (i in 1:3){
+  guess <- readline("Guess the song:")
+}
+```
+
+e. Add to your loop so that it checks whether the user entered the correct song title. If it does, print a win message and use `break` to stop the loop. If they're wrong, but they still have guesses left, print a "try again" message. If it was their last guess, reveal the answer.
+```{r}
+for (i in 1:3){
+  guess <- readline("Guess the song:")
+  if (guess == winner){
+    print("Congrats!")
+    break
+  } else if (i == 3) {
+    print(paste("Sorry! The correct answer was", winner))
+  } else {
+    print("Nope!")
+  }
+}
+```
+
+f. Put all the code you wrote for this into the `play` function it can be easily replayed.
+```{r}
+play <- function(){
+  options <- sample(df$title, 10)
+  winner <- sample(options, 1)
+ 
+  print("What song am I thining of?")
+  print(options)
+
+  
+  for (i in 1:3){
+    guess <- readline("Guess the song:")
+    if (guess == winner){
+      print("Congrats!")
+      break
+    } else if (i == 3) {
+      print(paste("Sorry! The correct answer was", winner))
+    } else {
+      print("Nope!")
+    }
+  }
+}
+```
+
+g. Use `play()` to play your game!
+```{r}
+play()
+```
+
+10. If you have time, think about what would make this game better. What do you wish it did that it currently doesn't? Can you figure out (using Google) how to make any of those things happen?
